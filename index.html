@@ -738,12 +738,18 @@ function render(){
             ? `<a class="book-btn" href="${escapeAttr(p.website)}" target="_blank" rel="noopener noreferrer">Book on site &#8599;</a>`
             : `<button class="book-btn ${p.booked?'booked':''}" data-toggle-id="${p.id}">${p.booked ? 'Edit booking' : 'Book it'}</button>`}
           ${!p.booked
-            ? `<button class="site-link-btn" data-site-id="${p.id}">${p.website ? 'Edit site link' : '+ Add site link'}</button>`
+            ? `<button class="site-link-btn" data-toggle-site-id="${p.id}">${p.website ? 'Edit site link' : '+ Add site link'}</button>`
             : ''}
         </div>
       </div>
       ${!p.booked && p.website
         ? `<button class="log-link-btn" data-toggle-id="${p.id}">Already booked it? Log the details</button>`
+        : ''}
+      ${!p.booked
+        ? `<div class="book-form" id="site-form-${p.id}">
+             <input type="text" id="site-input-${p.id}" placeholder="https://venue.com/tickets" value="${p.website ? escapeAttr(p.website) : ''}">
+             <button data-save-site-id="${p.id}">Save link</button>
+           </div>`
         : ''}
       <div class="book-form" id="form-${p.id}">
         <input type="date" id="date-${p.id}" value="${p.bookedDate||''}">
@@ -774,13 +780,20 @@ function render(){
     });
   });
 
-  document.querySelectorAll('[data-site-id]').forEach(btn=>{
+  document.querySelectorAll('[data-toggle-site-id]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      const id = Number(btn.dataset.siteId);
+      const id = btn.dataset.toggleSiteId;
+      const form = document.getElementById('site-form-'+id);
+      form.classList.toggle('show');
+      if(form.classList.contains('show')) document.getElementById('site-input-'+id).focus();
+    });
+  });
+
+  document.querySelectorAll('[data-save-site-id]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = Number(btn.dataset.saveSiteId);
       const prod = productions.find(p=>p.id===id);
-      const input = prompt(`Paste the booking page URL for "${prod.name}":`, prod.website || '');
-      if(input === null) return;
-      let url = input.trim();
+      let url = document.getElementById('site-input-'+id).value.trim();
       if(url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
       prod.website = url;
       saveData();
