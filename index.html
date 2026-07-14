@@ -458,6 +458,13 @@
       <option value="name">Name (A-Z)</option>
     </select>
   </div>
+  <div class="control-group">
+    <label>Prices</label>
+    <div class="toggle-group" id="priceToggle">
+      <button class="toggle-btn active" data-val="hide">Hidden</button>
+      <button class="toggle-btn" data-val="show">Show</button>
+    </div>
+  </div>
 </div>
 
 <div class="toolbar">
@@ -585,6 +592,7 @@ let productions = loadData();
 let filterStatus = 'all';
 let minInterest = 0;
 let sortBy = 'closing';
+let showPrices = false;
 
 const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
@@ -685,7 +693,7 @@ function render(){
         <span>${daysLeft>=0 ? daysLeft+' days left' : 'Closed'}</span>
       </div>
       <div class="status-row">
-        <span class="price-tag">${p.price ? '&pound;'+p.price : 'Price TBC'}</span>
+        ${showPrices ? `<span class="price-tag">${p.price ? '&pound;'+p.price : 'Price TBC'}</span>` : '<span></span>'}
         ${p.booked
           ? `<span class="book-info">Booked ${fmtDate(p.bookedDate)}${p.withWhom ? ' w/ '+p.withWhom : ''}</span>`
           : `<span></span>`}
@@ -848,6 +856,15 @@ document.getElementById('minInterest').addEventListener('click', (e)=>{
 document.getElementById('sortSelect').addEventListener('change', (e)=>{
   sortBy = e.target.value;
   render();
+});
+
+document.getElementById('priceToggle').addEventListener('click', (e)=>{
+  if(e.target.classList.contains('toggle-btn')){
+    document.querySelectorAll('#priceToggle .toggle-btn').forEach(b=>b.classList.remove('active'));
+    e.target.classList.add('active');
+    showPrices = e.target.dataset.val === 'show';
+    render();
+  }
 });
 
 let newInterest = 0;
