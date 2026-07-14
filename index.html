@@ -266,6 +266,35 @@
   }
   .book-btn:hover{background:var(--card-accent, var(--burgundy-dark));}
   .book-btn.booked{background:var(--booked);}
+  .book-btn{text-decoration:none;display:inline-block;}
+  .book-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .site-link-btn{
+    font-family:Arial, sans-serif;
+    font-size:0.72rem;
+    color:var(--muted);
+    background:none;
+    border:none;
+    cursor:pointer;
+    text-decoration:underline;
+    padding:0;
+  }
+  .log-link-btn{
+    font-family:Arial, sans-serif;
+    font-size:0.72rem;
+    color:var(--muted);
+    background:none;
+    border:none;
+    cursor:pointer;
+    text-decoration:underline;
+    padding:0;
+    text-align:left;
+    margin-top:-4px;
+  }
   .book-form{
     display:none;
     gap:8px;
@@ -538,6 +567,10 @@
       </div>
     </div>
     <div class="field">
+      <label>Booking page URL (optional, paste the theatre's own link)</label>
+      <input type="text" id="newWebsite" placeholder="e.g. https://www.venue.co.uk/tickets">
+    </div>
+    <div class="field">
       <label>Poster / photo (optional)</label>
       <input type="file" accept="image/*" id="newImageFile">
       <img id="newImagePreview">
@@ -596,6 +629,9 @@ let showPrices = false;
 
 const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
+function escapeAttr(str){
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 function fmtDate(dstr){
   const d = new Date(dstr);
   return d.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
@@ -697,8 +733,18 @@ function render(){
         ${p.booked
           ? `<span class="book-info">Booked ${fmtDate(p.bookedDate)}${p.withWhom ? ' w/ '+p.withWhom : ''}</span>`
           : `<span></span>`}
-        <button class="book-btn ${p.booked?'booked':''}" data-toggle-id="${p.id}">${p.booked ? 'Edit booking' : 'Book it'}</button>
+        <div class="book-actions">
+          ${!p.booked && p.website
+            ? `<a class="book-btn" href="${escapeAttr(p.website)}" target="_blank" rel="noopener noreferrer">Book on site &#8599;</a>`
+            : `<button class="book-btn ${p.booked?'booked':''}" data-toggle-id="${p.id}">${p.booked ? 'Edit booking' : 'Book it'}</button>`}
+          ${!p.booked
+            ? `<button class="site-link-btn" data-site-id="${p.id}">${p.website ? 'Edit site link' : '+ Add site link'}</button>`
+            : ''}
+        </div>
       </div>
+      ${!p.booked && p.website
+        ? `<button class="log-link-btn" data-toggle-id="${p.id}">Already booked it? Log the details</button>`
+        : ''}
       <div class="book-form" id="form-${p.id}">
         <input type="date" id="date-${p.id}" value="${p.bookedDate||''}">
         <input type="text" id="who-${p.id}" placeholder="With whom?" value="${p.withWhom||''}">
@@ -725,6 +771,20 @@ function render(){
       const id = btn.dataset.toggleId;
       const form = document.getElementById('form-'+id);
       form.classList.toggle('show');
+    });
+  });
+
+  document.querySelectorAll('[data-site-id]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = Number(btn.dataset.siteId);
+      const prod = productions.find(p=>p.id===id);
+      const input = prompt(`Paste the booking page URL for "${prod.name}":`, prod.website || '');
+      if(input === null) return;
+      let url = input.trim();
+      if(url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
+      prod.website = url;
+      saveData();
+      render();
     });
   });
 
@@ -881,6 +941,7 @@ function resetAddForm(){
   document.getElementById('newBookedCheck').checked = false;
   document.getElementById('newBookedDate').value = '';
   document.getElementById('newWithWhom').value = '';
+  document.getElementById('newWebsite').value = '';
   document.getElementById('newImageFile').value = '';
   const preview = document.getElementById('newImagePreview');
   preview.src = '';
@@ -937,6 +998,8 @@ document.getElementById('saveAddBtn').addEventListener('click', ()=>{
   const booked = document.getElementById('newBookedCheck').checked;
   const bookedDate = document.getElementById('newBookedDate').value;
   const priceVal = document.getElementById('newPrice').value;
+  let websiteVal = document.getElementById('newWebsite').value.trim();
+  if(websiteVal && !/^https?:\/\//i.test(websiteVal)) websiteVal = 'https://' + websiteVal;
 
   const newId = productions.length ? Math.max(...productions.map(p=>p.id)) + 1 : 1;
   productions.push({
@@ -951,6 +1014,7 @@ document.getElementById('saveAddBtn').addEventListener('click', ()=>{
     booked: booked && !!bookedDate,
     bookedDate: booked ? bookedDate : '',
     withWhom: document.getElementById('newWithWhom').value.trim(),
+    website: websiteVal,
     image: newImageData,
     theme: newThemeData
   });
