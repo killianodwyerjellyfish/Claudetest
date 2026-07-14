@@ -116,6 +116,43 @@
     display:flex;
     flex-direction:column;
     gap:10px;
+    overflow:hidden;
+  }
+  .prod-image{
+    margin:-18px -18px 0;
+    width:calc(100% + 36px);
+    height:150px;
+    object-fit:cover;
+    display:block;
+    background:linear-gradient(135deg,var(--gold-light),#f5f0fa);
+  }
+  .photo-slot{
+    margin:-18px -18px 0;
+    width:calc(100% + 36px);
+    height:60px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,var(--gold-light),#f5f0fa);
+  }
+  .photo-btn{
+    font-family:Arial, sans-serif;
+    font-size:0.75rem;
+    color:var(--burgundy-dark);
+    background:rgba(255,255,255,0.75);
+    border:1px solid var(--gold);
+    padding:4px 10px;
+    border-radius:20px;
+    cursor:pointer;
+  }
+  .prod-image-wrap{
+    position:relative;
+    margin:-18px -18px 0;
+  }
+  .prod-image-wrap .photo-btn{
+    position:absolute;
+    bottom:8px;
+    right:8px;
   }
   .prod-card.closing::before{
     content:"Closing soon";
@@ -243,6 +280,115 @@
     font-weight:bold;
     font-size:0.8rem;
   }
+  .toolbar{
+    max-width:1100px;
+    margin:18px auto 0;
+    padding:0 16px;
+    display:flex;
+    justify-content:flex-end;
+  }
+  .add-btn{
+    font-family:Arial, sans-serif;
+    background:var(--burgundy);
+    color:#fff;
+    border:none;
+    padding:10px 20px;
+    border-radius:24px;
+    font-size:0.9rem;
+    font-weight:bold;
+    cursor:pointer;
+    box-shadow:0 3px 8px rgba(107,76,154,0.3);
+  }
+  .add-btn:hover{background:var(--burgundy-dark);}
+  .modal-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(40,33,47,0.55);
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:100;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal-box{
+    background:#fff;
+    border-radius:16px;
+    padding:24px;
+    max-width:480px;
+    width:100%;
+    max-height:90vh;
+    overflow-y:auto;
+    box-shadow:0 12px 40px rgba(40,33,47,0.3);
+  }
+  .modal-box h2{
+    margin:0 0 16px;
+    color:var(--burgundy);
+    font-size:1.3rem;
+  }
+  .field{
+    margin-bottom:12px;
+  }
+  .field label{
+    display:block;
+    font-size:0.78rem;
+    color:var(--muted);
+    font-family:Arial, sans-serif;
+    margin-bottom:4px;
+  }
+  .field input, .field select{
+    width:100%;
+    font-family:Arial, sans-serif;
+    font-size:0.9rem;
+    padding:8px 10px;
+    border:1px solid #d3c0e8;
+    border-radius:8px;
+    background:#faf7fd;
+  }
+  .field-row{
+    display:flex;
+    gap:10px;
+  }
+  .field-row .field{flex:1;}
+  .field-stars{
+    display:flex;
+    gap:4px;
+    cursor:pointer;
+  }
+  .field-stars .star{font-size:1.4rem;}
+  .booked-toggle{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:12px;
+    font-family:Arial, sans-serif;
+    font-size:0.85rem;
+    color:var(--ink);
+  }
+  .modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:18px;
+  }
+  .modal-actions button{
+    font-family:Arial, sans-serif;
+    border:none;
+    padding:9px 18px;
+    border-radius:20px;
+    font-size:0.88rem;
+    cursor:pointer;
+  }
+  .btn-cancel{background:#eee;color:var(--ink);}
+  .btn-save{background:var(--burgundy);color:#fff;font-weight:bold;}
+  #newImagePreview{
+    width:100%;
+    height:110px;
+    object-fit:cover;
+    border-radius:8px;
+    margin-top:6px;
+    display:none;
+  }
   .empty-msg{
     text-align:center;
     color:var(--muted);
@@ -299,9 +445,89 @@
   </div>
 </div>
 
+<div class="toolbar">
+  <button class="add-btn" id="openAddBtn">+ Add production</button>
+</div>
+
 <main id="cardGrid"></main>
 
 <footer>Data is sample/demo content plus anything you've edited &mdash; saved in this browser only.</footer>
+
+<div class="modal-overlay" id="addModal">
+  <div class="modal-box">
+    <h2>Add a production</h2>
+    <div class="field">
+      <label>Show name*</label>
+      <input type="text" id="newName" placeholder="e.g. Fawlty Towers">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Venue</label>
+        <input type="text" id="newVenue" placeholder="e.g. Apollo Theatre">
+      </div>
+      <div class="field">
+        <label>Type</label>
+        <select id="newType">
+          <option>Play</option>
+          <option>Musical</option>
+          <option>Play (with music)</option>
+          <option>Concert / Musical</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Start date*</label>
+        <input type="date" id="newStart">
+      </div>
+      <div class="field">
+        <label>End date*</label>
+        <input type="date" id="newEnd">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Ticket price (&pound;, optional)</label>
+        <input type="number" step="0.01" id="newPrice" placeholder="e.g. 65">
+      </div>
+      <div class="field">
+        <label>How keen are you?</label>
+        <div class="field-stars" id="newStars">
+          <span class="star" data-val="1">&#9733;</span>
+          <span class="star" data-val="2">&#9733;</span>
+          <span class="star" data-val="3">&#9733;</span>
+          <span class="star" data-val="4">&#9733;</span>
+          <span class="star" data-val="5">&#9733;</span>
+        </div>
+      </div>
+    </div>
+    <div class="booked-toggle">
+      <input type="checkbox" id="newBookedCheck">
+      <label for="newBookedCheck" style="margin:0;">Already booked</label>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Booked date</label>
+        <input type="date" id="newBookedDate">
+      </div>
+      <div class="field">
+        <label>Going with</label>
+        <input type="text" id="newWithWhom" placeholder="e.g. Louise">
+      </div>
+    </div>
+    <div class="field">
+      <label>Poster / photo (optional)</label>
+      <input type="file" accept="image/*" id="newImageFile">
+      <img id="newImagePreview">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="cancelAddBtn">Cancel</button>
+      <button class="btn-save" id="saveAddBtn">Add production</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" accept="image/*" id="cardPhotoInput" style="display:none;">
 
 <script>
 const TODAY = new Date('2026-07-14');
@@ -412,7 +638,12 @@ function render(){
 
     const runLenLabel = totalRun > 3650 ? 'Open-ended run' : `${totalRun} days total run`;
 
+    const imageHtml = p.image
+      ? `<div class="prod-image-wrap"><img class="prod-image" src="${p.image}"><button class="photo-btn" data-photo-id="${p.id}">Change photo</button></div>`
+      : `<div class="photo-slot"><button class="photo-btn" data-photo-id="${p.id}">+ Add photo</button></div>`;
+
     card.innerHTML = `
+      ${imageHtml}
       <h3 class="prod-title">${p.name}</h3>
       <p class="prod-venue">${p.venue} &middot; ${p.type}</p>
       <div class="stars" data-card-id="${p.id}">${starsHtml}</div>
@@ -474,7 +705,29 @@ function render(){
       render();
     });
   });
+
+  document.querySelectorAll('[data-photo-id]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      cardPhotoTargetId = Number(btn.dataset.photoId);
+      document.getElementById('cardPhotoInput').click();
+    });
+  });
 }
+
+let cardPhotoTargetId = null;
+document.getElementById('cardPhotoInput').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file || cardPhotoTargetId===null) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    const prod = productions.find(p=>p.id===cardPhotoTargetId);
+    prod.image = reader.result;
+    saveData();
+    render();
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+});
 
 document.getElementById('statusToggle').addEventListener('click', (e)=>{
   if(e.target.classList.contains('toggle-btn')){
@@ -498,6 +751,94 @@ document.getElementById('minInterest').addEventListener('click', (e)=>{
 
 document.getElementById('sortSelect').addEventListener('change', (e)=>{
   sortBy = e.target.value;
+  render();
+});
+
+let newInterest = 0;
+let newImageData = '';
+
+function resetAddForm(){
+  document.getElementById('newName').value = '';
+  document.getElementById('newVenue').value = '';
+  document.getElementById('newType').value = 'Play';
+  document.getElementById('newStart').value = '';
+  document.getElementById('newEnd').value = '';
+  document.getElementById('newPrice').value = '';
+  document.getElementById('newBookedCheck').checked = false;
+  document.getElementById('newBookedDate').value = '';
+  document.getElementById('newWithWhom').value = '';
+  document.getElementById('newImageFile').value = '';
+  const preview = document.getElementById('newImagePreview');
+  preview.src = '';
+  preview.style.display = 'none';
+  newImageData = '';
+  newInterest = 0;
+  document.querySelectorAll('#newStars .star').forEach(s=>s.classList.remove('filled'));
+}
+
+document.getElementById('openAddBtn').addEventListener('click', ()=>{
+  resetAddForm();
+  document.getElementById('addModal').classList.add('show');
+});
+document.getElementById('cancelAddBtn').addEventListener('click', ()=>{
+  document.getElementById('addModal').classList.remove('show');
+});
+document.getElementById('addModal').addEventListener('click', (e)=>{
+  if(e.target.id === 'addModal') document.getElementById('addModal').classList.remove('show');
+});
+
+document.getElementById('newStars').addEventListener('click', (e)=>{
+  if(e.target.classList.contains('star')){
+    const val = Number(e.target.dataset.val);
+    newInterest = (newInterest === val) ? val-1 : val;
+    document.querySelectorAll('#newStars .star').forEach(s=>{
+      s.classList.toggle('filled', Number(s.dataset.val) <= newInterest);
+    });
+  }
+});
+
+document.getElementById('newImageFile').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    newImageData = reader.result;
+    const preview = document.getElementById('newImagePreview');
+    preview.src = newImageData;
+    preview.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('saveAddBtn').addEventListener('click', ()=>{
+  const name = document.getElementById('newName').value.trim();
+  const start = document.getElementById('newStart').value;
+  const end = document.getElementById('newEnd').value;
+  if(!name || !start || !end){
+    alert('Please fill in the show name, start date, and end date.');
+    return;
+  }
+  const booked = document.getElementById('newBookedCheck').checked;
+  const bookedDate = document.getElementById('newBookedDate').value;
+  const priceVal = document.getElementById('newPrice').value;
+
+  const newId = productions.length ? Math.max(...productions.map(p=>p.id)) + 1 : 1;
+  productions.push({
+    id: newId,
+    name: name,
+    venue: document.getElementById('newVenue').value.trim(),
+    type: document.getElementById('newType').value,
+    start: start,
+    end: end,
+    interest: newInterest,
+    price: priceVal ? Number(priceVal) : null,
+    booked: booked && !!bookedDate,
+    bookedDate: booked ? bookedDate : '',
+    withWhom: document.getElementById('newWithWhom').value.trim(),
+    image: newImageData
+  });
+  saveData();
+  document.getElementById('addModal').classList.remove('show');
   render();
 });
 
