@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Theatre Tracker</title>
+<style>
+  :root{
+    --burgundy:#1f6b45;
+    --burgundy-dark:#134d31;
+    --gold:#3f9e63;
+    --gold-light:#bdeacb;
+    --cream:#ffffff;
+    --card:#ffffff;
+    --ink:#1f2a24;
+    --muted:#6b7b72;
+    --soon:#b23a2e;
+    --booked:#1f6b45;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Georgia', 'Times New Roman', serif;
+    background:linear-gradient(180deg,var(--cream),#eef6f0);
+    color:var(--ink);
+    min-height:100vh;
+  }
+  header{
+    background:linear-gradient(135deg,var(--burgundy),var(--burgundy-dark));
+    color:var(--cream);
+    padding:28px 20px 22px;
+    text-align:center;
+    box-shadow:0 4px 12px rgba(0,0,0,0.25);
+  }
+  header h1{
+    margin:0 0 4px;
+    font-size:1.8rem;
+    letter-spacing:1px;
+  }
+  header p{
+    margin:0;
+    color:var(--gold-light);
+    font-size:0.95rem;
+    font-style:italic;
+  }
+  .controls{
+    max-width:1100px;
+    margin:20px auto 0;
+    padding:0 16px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    align-items:center;
+    justify-content:center;
+  }
+  .controls label{
+    font-size:0.8rem;
+    color:var(--muted);
+    display:block;
+    margin-bottom:3px;
+  }
+  .control-group{
+    background:var(--card);
+    border:1px solid #d5e8da;
+    border-radius:10px;
+    padding:8px 12px;
+  }
+  select, .toggle-group{
+    font-family:inherit;
+    font-size:0.95rem;
+    border:none;
+    background:transparent;
+    color:var(--ink);
+  }
+  select:focus{outline:none;}
+  .toggle-group{
+    display:flex;
+    gap:6px;
+  }
+  .toggle-btn{
+    border:1px solid #bcdcc6;
+    background:#fff;
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:0.85rem;
+    cursor:pointer;
+    color:var(--muted);
+    transition:0.15s;
+  }
+  .toggle-btn.active{
+    background:var(--gold);
+    color:var(--burgundy-dark);
+    border-color:var(--gold);
+    font-weight:bold;
+  }
+  .stars-filter{
+    display:flex;
+    gap:2px;
+    cursor:pointer;
+  }
+  main{
+    max-width:1100px;
+    margin:24px auto 60px;
+    padding:0 16px;
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));
+    gap:18px;
+  }
+  .prod-card{
+    background:var(--card);
+    border-radius:14px;
+    padding:18px 18px 16px;
+    box-shadow:0 3px 10px rgba(31,107,69,0.12);
+    border:1px solid #e2f0e6;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .prod-card.closing::before{
+    content:"Closing soon";
+    position:absolute;
+    top:-9px;
+    right:14px;
+    background:var(--soon);
+    color:#fff;
+    font-size:0.68rem;
+    font-family:Arial, sans-serif;
+    padding:3px 10px;
+    border-radius:12px;
+    letter-spacing:0.5px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.2);
+  }
+  .prod-title{
+    font-size:1.2rem;
+    color:var(--burgundy);
+    margin:0;
+  }
+  .prod-venue{
+    font-size:0.88rem;
+    color:var(--muted);
+    margin:-6px 0 0;
+  }
+  .stars{
+    display:flex;
+    gap:3px;
+    cursor:pointer;
+  }
+  .star{
+    font-size:1.1rem;
+    color:#d3e0d6;
+  }
+  .star.filled{color:var(--gold);}
+  .dates-row{
+    font-size:0.85rem;
+    color:var(--ink);
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+  }
+  .dates-row .day{
+    color:var(--muted);
+    font-size:0.75rem;
+  }
+  .run-bar-wrap{
+    background:#e2f0e6;
+    border-radius:8px;
+    height:10px;
+    overflow:hidden;
+    position:relative;
+  }
+  .run-bar{
+    height:100%;
+    background:linear-gradient(90deg,var(--gold),var(--burgundy));
+    border-radius:8px;
+  }
+  .run-caption{
+    font-size:0.75rem;
+    color:var(--muted);
+    display:flex;
+    justify-content:space-between;
+  }
+  .status-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:4px;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .price-tag{
+    font-family:Arial, sans-serif;
+    font-size:0.85rem;
+    color:var(--ink);
+    background:#eaf7ee;
+    padding:3px 9px;
+    border-radius:6px;
+  }
+  .book-info{
+    font-size:0.85rem;
+    color:var(--booked);
+    font-weight:bold;
+  }
+  .book-btn{
+    font-family:Arial, sans-serif;
+    background:var(--burgundy);
+    color:#fff;
+    border:none;
+    padding:6px 14px;
+    border-radius:20px;
+    font-size:0.8rem;
+    cursor:pointer;
+    transition:0.15s;
+  }
+  .book-btn:hover{background:var(--burgundy-dark);}
+  .book-btn.booked{background:var(--booked);}
+  .book-form{
+    display:none;
+    gap:8px;
+    flex-wrap:wrap;
+    background:#f2faf4;
+    border-radius:8px;
+    padding:10px;
+    margin-top:4px;
+  }
+  .book-form.show{display:flex;}
+  .book-form input{
+    font-family:Arial, sans-serif;
+    padding:6px 8px;
+    border:1px solid #bcdcc6;
+    border-radius:6px;
+    font-size:0.85rem;
+    flex:1;
+    min-width:100px;
+  }
+  .book-form button{
+    font-family:Arial, sans-serif;
+    background:var(--gold);
+    border:none;
+    padding:6px 12px;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+    font-size:0.8rem;
+  }
+  .empty-msg{
+    text-align:center;
+    color:var(--muted);
+    font-style:italic;
+    grid-column:1/-1;
+    padding:40px;
+  }
+  footer{
+    text-align:center;
+    color:var(--muted);
+    font-size:0.8rem;
+    padding-bottom:30px;
+  }
+  @media (max-width:480px){
+    header h1{font-size:1.4rem;}
+    main{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>&#127917; My Theatre Tracker</h1>
+  <p>Shows you're keen on, at a glance</p>
+</header>
+
+<div class="controls">
+  <div class="control-group">
+    <label>Status</label>
+    <div class="toggle-group" id="statusToggle">
+      <button class="toggle-btn active" data-val="all">All</button>
+      <button class="toggle-btn" data-val="booked">Booked</button>
+      <button class="toggle-btn" data-val="unbooked">Unbooked</button>
+    </div>
+  </div>
+  <div class="control-group">
+    <label>Min. interest</label>
+    <div class="stars-filter" id="minInterest">
+      <span class="star" data-val="1">&#9733;</span>
+      <span class="star" data-val="2">&#9733;</span>
+      <span class="star" data-val="3">&#9733;</span>
+      <span class="star" data-val="4">&#9733;</span>
+      <span class="star" data-val="5">&#9733;</span>
+    </div>
+  </div>
+  <div class="control-group">
+    <label>Sort by</label>
+    <select id="sortSelect">
+      <option value="closing">Closing soonest</option>
+      <option value="interest">Most keen first</option>
+      <option value="booked_date">Booked date</option>
+      <option value="name">Name (A-Z)</option>
+    </select>
+  </div>
+</div>
+
+<main id="cardGrid"></main>
+
+<footer>Data is sample/demo content plus anything you've edited &mdash; saved in this browser only.</footer>
+
+<script>
+const TODAY = new Date('2026-07-14');
+
+const SAMPLE_DATA = [
+  {id:1, name:"Operation Mincemeat", venue:"Fortune Theatre", start:"2023-03-13", end:"2026-07-26", interest:4, price:65, booked:true, bookedDate:"2026-07-20", withWhom:"Sarah"},
+  {id:2, name:"Cabaret at the Kit Kat Club", venue:"Playhouse Theatre", start:"2021-12-04", end:"2026-07-30", interest:5, price:120, booked:false, bookedDate:"", withWhom:""},
+  {id:3, name:"Sunset Boulevard", venue:"Savoy Theatre", start:"2024-09-01", end:"2026-08-01", interest:5, price:75, booked:false, bookedDate:"", withWhom:""},
+  {id:4, name:"Hamilton", venue:"Victoria Palace Theatre", start:"2017-12-21", end:"2027-06-30", interest:5, price:89, booked:false, bookedDate:"", withWhom:""},
+  {id:5, name:"Six the Musical", venue:"Vaudeville Theatre", start:"2019-01-30", end:"2027-03-01", interest:4, price:45, booked:true, bookedDate:"2026-09-10", withWhom:"James"},
+  {id:6, name:"The Book of Mormon", venue:"Prince of Wales Theatre", start:"2013-03-21", end:"2026-12-31", interest:3, price:55, booked:false, bookedDate:"", withWhom:""},
+  {id:7, name:"Matilda the Musical", venue:"Cambridge Theatre", start:"2011-11-24", end:"2027-01-15", interest:2, price:50, booked:false, bookedDate:"", withWhom:""},
+  {id:8, name:"The Mousetrap", venue:"St Martin's Theatre", start:"1952-11-25", end:"2099-12-31", interest:3, price:40, booked:false, bookedDate:"", withWhom:""}
+];
+
+function loadData(){
+  const saved = localStorage.getItem('theatreTrackerData');
+  if(saved){
+    try { return JSON.parse(saved); } catch(e){ return SAMPLE_DATA; }
+  }
+  return SAMPLE_DATA;
+}
+function saveData(){
+  localStorage.setItem('theatreTrackerData', JSON.stringify(productions));
+}
+
+let productions = loadData();
+let filterStatus = 'all';
+let minInterest = 0;
+let sortBy = 'closing';
+
+const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+function fmtDate(dstr){
+  const d = new Date(dstr);
+  return d.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+}
+function dayName(dstr){
+  return DAY_NAMES[new Date(dstr).getDay()];
+}
+function daysBetween(a,b){
+  return Math.round((b-a)/(1000*60*60*24));
+}
+
+function render(){
+  const grid = document.getElementById('cardGrid');
+  grid.innerHTML = '';
+
+  let list = productions.filter(p=>{
+    if(filterStatus==='booked' && !p.booked) return false;
+    if(filterStatus==='unbooked' && p.booked) return false;
+    if(p.interest < minInterest) return false;
+    return true;
+  });
+
+  list.sort((a,b)=>{
+    if(sortBy==='closing'){
+      return new Date(a.end) - new Date(b.end);
+    }
+    if(sortBy==='interest'){
+      return b.interest - a.interest;
+    }
+    if(sortBy==='booked_date'){
+      if(!a.bookedDate && !b.bookedDate) return 0;
+      if(!a.bookedDate) return 1;
+      if(!b.bookedDate) return -1;
+      return new Date(a.bookedDate) - new Date(b.bookedDate);
+    }
+    if(sortBy==='name'){
+      return a.name.localeCompare(b.name);
+    }
+    return 0;
+  });
+
+  if(list.length===0){
+    grid.innerHTML = '<div class="empty-msg">No productions match these filters.</div>';
+    return;
+  }
+
+  list.forEach(p=>{
+    const start = new Date(p.start);
+    const end = new Date(p.end);
+    const totalRun = Math.max(daysBetween(start,end),1);
+    const elapsed = Math.min(Math.max(daysBetween(start,TODAY),0), totalRun);
+    const pctElapsed = Math.round((elapsed/totalRun)*100);
+    const daysLeft = daysBetween(TODAY, end);
+    const isClosing = daysLeft <= 21 && daysLeft >= 0;
+
+    const card = document.createElement('div');
+    card.className = 'prod-card' + (isClosing ? ' closing' : '');
+
+    let starsHtml = '';
+    for(let i=1;i<=5;i++){
+      starsHtml += `<span class="star ${i<=p.interest?'filled':''}" data-id="${p.id}" data-star="${i}">&#9733;</span>`;
+    }
+
+    const runLenLabel = totalRun > 3650 ? 'Open-ended run' : `${totalRun} days total run`;
+
+    card.innerHTML = `
+      <h3 class="prod-title">${p.name}</h3>
+      <p class="prod-venue">${p.venue}</p>
+      <div class="stars" data-card-id="${p.id}">${starsHtml}</div>
+      <div class="dates-row">
+        <span>${fmtDate(p.start)} <span class="day">(${dayName(p.start)})</span></span>
+        <span>&rarr;</span>
+        <span>${fmtDate(p.end)} <span class="day">(${dayName(p.end)})</span></span>
+      </div>
+      <div class="run-bar-wrap"><div class="run-bar" style="width:${totalRun>3650?100:pctElapsed}%"></div></div>
+      <div class="run-caption">
+        <span>${runLenLabel}</span>
+        <span>${daysLeft>=0 ? daysLeft+' days left' : 'Closed'}</span>
+      </div>
+      <div class="status-row">
+        <span class="price-tag">&pound;${p.price}</span>
+        ${p.booked
+          ? `<span class="book-info">Booked ${fmtDate(p.bookedDate)}${p.withWhom ? ' w/ '+p.withWhom : ''}</span>`
+          : `<span></span>`}
+        <button class="book-btn ${p.booked?'booked':''}" data-toggle-id="${p.id}">${p.booked ? 'Edit booking' : 'Book it'}</button>
+      </div>
+      <div class="book-form" id="form-${p.id}">
+        <input type="date" id="date-${p.id}" value="${p.bookedDate||''}">
+        <input type="text" id="who-${p.id}" placeholder="With whom?" value="${p.withWhom||''}">
+        <button data-save-id="${p.id}">Save</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  document.querySelectorAll('.stars .star').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const id = Number(el.dataset.id);
+      const val = Number(el.dataset.star);
+      const prod = productions.find(p=>p.id===id);
+      prod.interest = (prod.interest === val) ? val-1 : val;
+      saveData();
+      render();
+    });
+  });
+
+  document.querySelectorAll('[data-toggle-id]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.dataset.toggleId;
+      const form = document.getElementById('form-'+id);
+      form.classList.toggle('show');
+    });
+  });
+
+  document.querySelectorAll('[data-save-id]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = Number(btn.dataset.saveId);
+      const prod = productions.find(p=>p.id===id);
+      const dateVal = document.getElementById('date-'+id).value;
+      const whoVal = document.getElementById('who-'+id).value;
+      prod.bookedDate = dateVal;
+      prod.withWhom = whoVal;
+      prod.booked = !!dateVal;
+      saveData();
+      render();
+    });
+  });
+}
+
+document.getElementById('statusToggle').addEventListener('click', (e)=>{
+  if(e.target.classList.contains('toggle-btn')){
+    document.querySelectorAll('#statusToggle .toggle-btn').forEach(b=>b.classList.remove('active'));
+    e.target.classList.add('active');
+    filterStatus = e.target.dataset.val;
+    render();
+  }
+});
+
+document.getElementById('minInterest').addEventListener('click', (e)=>{
+  if(e.target.classList.contains('star')){
+    const val = Number(e.target.dataset.val);
+    minInterest = (minInterest === val) ? 0 : val;
+    document.querySelectorAll('#minInterest .star').forEach(s=>{
+      s.classList.toggle('filled', Number(s.dataset.val) <= minInterest);
+    });
+    render();
+  }
+});
+
+document.getElementById('sortSelect').addEventListener('change', (e)=>{
+  sortBy = e.target.value;
+  render();
+});
+
+render();
+</script>
+
+</body>
+</html>
