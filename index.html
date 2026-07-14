@@ -307,25 +307,37 @@
 const TODAY = new Date('2026-07-14');
 
 const SAMPLE_DATA = [
-  {id:1, name:"Operation Mincemeat", venue:"Fortune Theatre", start:"2023-03-13", end:"2026-07-26", interest:4, price:65, booked:true, bookedDate:"2026-07-20", withWhom:"Sarah"},
-  {id:2, name:"Cabaret at the Kit Kat Club", venue:"Playhouse Theatre", start:"2021-12-04", end:"2026-07-30", interest:5, price:120, booked:false, bookedDate:"", withWhom:""},
-  {id:3, name:"Sunset Boulevard", venue:"Savoy Theatre", start:"2024-09-01", end:"2026-08-01", interest:5, price:75, booked:false, bookedDate:"", withWhom:""},
-  {id:4, name:"Hamilton", venue:"Victoria Palace Theatre", start:"2017-12-21", end:"2027-06-30", interest:5, price:89, booked:false, bookedDate:"", withWhom:""},
-  {id:5, name:"Six the Musical", venue:"Vaudeville Theatre", start:"2019-01-30", end:"2027-03-01", interest:4, price:45, booked:true, bookedDate:"2026-09-10", withWhom:"James"},
-  {id:6, name:"The Book of Mormon", venue:"Prince of Wales Theatre", start:"2013-03-21", end:"2026-12-31", interest:3, price:55, booked:false, bookedDate:"", withWhom:""},
-  {id:7, name:"Matilda the Musical", venue:"Cambridge Theatre", start:"2011-11-24", end:"2027-01-15", interest:2, price:50, booked:false, bookedDate:"", withWhom:""},
-  {id:8, name:"The Mousetrap", venue:"St Martin's Theatre", start:"1952-11-25", end:"2099-12-31", interest:3, price:40, booked:false, bookedDate:"", withWhom:""}
+  {id:1, name:"Midnight at the Never Get", venue:"Menier", type:"Musical", start:"2026-07-11", end:"2026-09-12", interest:4, price:70.25, booked:true, bookedDate:"2026-07-23", withWhom:"Nigel/Steph"},
+  {id:2, name:"Pride", venue:"National (Dorfman)", type:"Musical", start:"2026-06-11", end:"2026-09-12", interest:5, price:79, booked:true, bookedDate:"2026-07-24", withWhom:"Caoimhe"},
+  {id:3, name:"Paddington", venue:"Savoy", type:"Musical", start:"2025-12-01", end:"2027-01-01", interest:5, price:65, booked:true, bookedDate:"2026-07-27", withWhom:"Taylor"},
+  {id:4, name:"Oh Mary (Cole Escola run)", venue:"Trafalgar Theatre", type:"Play", start:"2026-07-20", end:"2026-08-15", interest:4, price:null, booked:false, bookedDate:"", withWhom:""},
+  {id:5, name:"Here Comes J Edgar", venue:"King's Head", type:"Musical", start:"2026-07-10", end:"2026-08-16", interest:3, price:null, booked:false, bookedDate:"", withWhom:"Charlie"},
+  {id:6, name:"Trainspotting", venue:"Theatre Royal Haymarket", type:"Musical", start:"2026-07-15", end:"2026-09-05", interest:3, price:null, booked:false, bookedDate:"", withWhom:""},
+  {id:7, name:"Death Note", venue:"Barbican", type:"Musical", start:"2026-07-30", end:"2026-09-12", interest:4, price:null, booked:false, bookedDate:"", withWhom:""},
+  {id:8, name:"Arcadia", venue:"Duke of York's", type:"Play", start:"2026-06-20", end:"2026-09-12", interest:3, price:null, booked:false, bookedDate:"", withWhom:""},
+  {id:9, name:"Thelma & Louise", venue:"Young Vic", type:"Musical", start:"2026-09-03", end:"2026-10-24", interest:4, price:51, booked:true, bookedDate:"2026-09-18", withWhom:""},
+  {id:10, name:"The Comedy About Spies", venue:"Adelphi", type:"Play", start:"2026-08-04", end:"2026-09-26", interest:3, price:null, booked:false, bookedDate:"", withWhom:""},
+  {id:11, name:"My Son's A Queer", venue:"Apollo theatre", type:"Play (with music)", start:"2026-09-16", end:"2026-10-03", interest:5, price:null, booked:false, bookedDate:"", withWhom:"Charlie?"},
+  {id:12, name:"Oliver!", venue:"Gielgud Theatre", type:"Musical", start:"2024-12-14", end:"2026-10-04", interest:2, price:null, booked:false, bookedDate:"", withWhom:"Caoimhe"},
+  {id:13, name:"Electra/Persona", venue:"National / Lyttleton", type:"Play", start:"2026-08-19", end:"2026-10-10", interest:2, price:null, booked:false, bookedDate:"", withWhom:"Louise"},
+  {id:14, name:"RENT", venue:"Duke of York's", type:"Musical", start:"2026-09-26", end:"2027-02-13", interest:5, price:75, booked:true, bookedDate:"2026-10-16", withWhom:"Åine"},
+  {id:15, name:"Love Never Dies", venue:"Palladium", type:"Concert / Musical", start:"2026-10-16", end:"2026-10-18", interest:4, price:null, booked:false, bookedDate:"", withWhom:"Caoimhe? Parents?"},
+  {id:16, name:"The Lives of Others", venue:"Adelphi", type:"Play", start:"2026-10-14", end:"2027-01-09", interest:5, price:75, booked:true, bookedDate:"2026-10-23", withWhom:"Louise"},
+  {id:17, name:"Man to Man", venue:"Royal Court", type:"Play", start:"2026-09-05", end:"2026-10-24", interest:2, price:null, booked:false, bookedDate:"", withWhom:"Louise?"},
+  {id:18, name:"Matilda", venue:"Cambridge Theatre", type:"Musical", start:"2024-01-01", end:"2027-01-01", interest:3, price:null, booked:false, bookedDate:"", withWhom:"Elliott?"},
+  {id:19, name:"Beetlejuice", venue:"Prince Edward", type:"Musical", start:"2026-05-20", end:"2027-04-17", interest:3, price:null, booked:false, bookedDate:"", withWhom:"Louise?/Caoimhe?"},
+  {id:20, name:"Amadeus", venue:"Noel Coward Theatre", type:"Play (with music)", start:"2027-04-17", end:"2027-08-07", interest:3, price:null, booked:false, bookedDate:"", withWhom:""}
 ];
 
 function loadData(){
-  const saved = localStorage.getItem('theatreTrackerData');
+  const saved = localStorage.getItem('theatreTrackerData_v2');
   if(saved){
     try { return JSON.parse(saved); } catch(e){ return SAMPLE_DATA; }
   }
   return SAMPLE_DATA;
 }
 function saveData(){
-  localStorage.setItem('theatreTrackerData', JSON.stringify(productions));
+  localStorage.setItem('theatreTrackerData_v2', JSON.stringify(productions));
 }
 
 let productions = loadData();
@@ -402,7 +414,7 @@ function render(){
 
     card.innerHTML = `
       <h3 class="prod-title">${p.name}</h3>
-      <p class="prod-venue">${p.venue}</p>
+      <p class="prod-venue">${p.venue} &middot; ${p.type}</p>
       <div class="stars" data-card-id="${p.id}">${starsHtml}</div>
       <div class="dates-row">
         <span>${fmtDate(p.start)} <span class="day">(${dayName(p.start)})</span></span>
@@ -415,7 +427,7 @@ function render(){
         <span>${daysLeft>=0 ? daysLeft+' days left' : 'Closed'}</span>
       </div>
       <div class="status-row">
-        <span class="price-tag">&pound;${p.price}</span>
+        <span class="price-tag">${p.price ? '&pound;'+p.price : 'Price TBC'}</span>
         ${p.booked
           ? `<span class="book-info">Booked ${fmtDate(p.bookedDate)}${p.withWhom ? ' w/ '+p.withWhom : ''}</span>`
           : `<span></span>`}
