@@ -107,52 +107,67 @@
     gap:18px;
   }
   .prod-card{
-    background:var(--card);
+    background:linear-gradient(160deg, var(--card-tint, #ffffff), #ffffff 60%);
     border-radius:14px;
-    padding:18px 18px 16px;
+    padding:16px;
     box-shadow:0 3px 10px rgba(107,76,154,0.14);
-    border:1px solid #ede4f7;
+    border:1px solid var(--card-border, #ede4f7);
     position:relative;
     display:flex;
+    flex-direction:row;
+    align-items:flex-start;
+    gap:14px;
+    transition:border-color 0.2s, background 0.2s;
+  }
+  .prod-photo-col{
+    flex-shrink:0;
+    width:92px;
+    display:flex;
     flex-direction:column;
-    gap:10px;
-    overflow:hidden;
+    align-items:center;
+    gap:6px;
   }
-  .prod-image{
-    margin:-18px -18px 0;
-    width:calc(100% + 36px);
-    height:150px;
+  .prod-thumb{
+    width:92px;
+    height:138px;
     object-fit:cover;
+    border-radius:10px;
     display:block;
-    background:linear-gradient(135deg,var(--gold-light),#f5f0fa);
+    box-shadow:0 2px 8px rgba(0,0,0,0.18);
   }
-  .photo-slot{
-    margin:-18px -18px 0;
-    width:calc(100% + 36px);
-    height:60px;
+  .prod-thumb-placeholder{
+    width:92px;
+    height:138px;
+    border-radius:10px;
+    border:2px dashed var(--card-accent, var(--gold));
+    background:var(--card-tint, #f8f3fc);
+    color:var(--card-accent-dark, var(--burgundy));
+    font-family:Arial, sans-serif;
+    font-size:0.72rem;
+    line-height:1.3;
+    cursor:pointer;
     display:flex;
     align-items:center;
     justify-content:center;
-    background:linear-gradient(135deg,var(--gold-light),#f5f0fa);
+    text-align:center;
+    padding:6px;
   }
-  .photo-btn{
+  .photo-link{
     font-family:Arial, sans-serif;
-    font-size:0.75rem;
-    color:var(--burgundy-dark);
-    background:rgba(255,255,255,0.75);
-    border:1px solid var(--gold);
-    padding:4px 10px;
-    border-radius:20px;
+    font-size:0.7rem;
+    color:var(--muted);
+    background:none;
+    border:none;
     cursor:pointer;
+    text-decoration:underline;
+    padding:0;
   }
-  .prod-image-wrap{
-    position:relative;
-    margin:-18px -18px 0;
-  }
-  .prod-image-wrap .photo-btn{
-    position:absolute;
-    bottom:8px;
-    right:8px;
+  .prod-details{
+    flex:1;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
   }
   .prod-card.closing::before{
     content:"Closing soon";
@@ -170,7 +185,7 @@
   }
   .prod-title{
     font-size:1.2rem;
-    color:var(--burgundy);
+    color:var(--card-accent-dark, var(--burgundy));
     margin:0;
   }
   .prod-venue{
@@ -187,7 +202,7 @@
     font-size:1.1rem;
     color:#ddd0e8;
   }
-  .star.filled{color:var(--gold);}
+  .star.filled{color:var(--card-accent, var(--gold));}
   .dates-row{
     font-size:0.85rem;
     color:var(--ink);
@@ -208,7 +223,7 @@
   }
   .run-bar{
     height:100%;
-    background:linear-gradient(90deg,var(--gold),var(--burgundy));
+    background:linear-gradient(90deg,var(--card-accent, var(--gold)),var(--card-accent-dark, var(--burgundy)));
     border-radius:8px;
   }
   .run-caption{
@@ -240,7 +255,7 @@
   }
   .book-btn{
     font-family:Arial, sans-serif;
-    background:var(--burgundy);
+    background:var(--card-accent-dark, var(--burgundy));
     color:#fff;
     border:none;
     padding:6px 14px;
@@ -249,7 +264,7 @@
     cursor:pointer;
     transition:0.15s;
   }
-  .book-btn:hover{background:var(--burgundy-dark);}
+  .book-btn:hover{background:var(--card-accent, var(--burgundy-dark));}
   .book-btn.booked{background:var(--booked);}
   .book-form{
     display:none;
@@ -382,10 +397,10 @@
   .btn-cancel{background:#eee;color:var(--ink);}
   .btn-save{background:var(--burgundy);color:#fff;font-weight:bold;}
   #newImagePreview{
-    width:100%;
-    height:110px;
+    width:92px;
+    height:138px;
     object-fit:cover;
-    border-radius:8px;
+    border-radius:10px;
     margin-top:6px;
     display:none;
   }
@@ -630,6 +645,12 @@ function render(){
 
     const card = document.createElement('div');
     card.className = 'prod-card' + (isClosing ? ' closing' : '');
+    if(p.theme){
+      card.style.setProperty('--card-accent', p.theme.accent);
+      card.style.setProperty('--card-accent-dark', p.theme.accentDark);
+      card.style.setProperty('--card-tint', p.theme.tint);
+      card.style.setProperty('--card-border', p.theme.accent);
+    }
 
     let starsHtml = '';
     for(let i=1;i<=5;i++){
@@ -638,12 +659,18 @@ function render(){
 
     const runLenLabel = totalRun > 3650 ? 'Open-ended run' : `${totalRun} days total run`;
 
-    const imageHtml = p.image
-      ? `<div class="prod-image-wrap"><img class="prod-image" src="${p.image}"><button class="photo-btn" data-photo-id="${p.id}">Change photo</button></div>`
-      : `<div class="photo-slot"><button class="photo-btn" data-photo-id="${p.id}">+ Add photo</button></div>`;
+    const photoHtml = p.image
+      ? `<div class="prod-photo-col">
+           <img class="prod-thumb" src="${p.image}">
+           <button class="photo-link" data-photo-id="${p.id}">Change photo</button>
+         </div>`
+      : `<div class="prod-photo-col">
+           <button class="prod-thumb-placeholder" data-photo-id="${p.id}">+ Add<br>photo</button>
+         </div>`;
 
     card.innerHTML = `
-      ${imageHtml}
+      ${photoHtml}
+      <div class="prod-details">
       <h3 class="prod-title">${p.name}</h3>
       <p class="prod-venue">${p.venue} &middot; ${p.type}</p>
       <div class="stars" data-card-id="${p.id}">${starsHtml}</div>
@@ -668,6 +695,7 @@ function render(){
         <input type="date" id="date-${p.id}" value="${p.bookedDate||''}">
         <input type="text" id="who-${p.id}" placeholder="With whom?" value="${p.withWhom||''}">
         <button data-save-id="${p.id}">Save</button>
+      </div>
       </div>
     `;
     grid.appendChild(card);
@@ -714,14 +742,82 @@ function render(){
   });
 }
 
+function rgbToHsl(r,g,b){
+  r/=255; g/=255; b/=255;
+  const max=Math.max(r,g,b), min=Math.min(r,g,b);
+  let h,s,l=(max+min)/2;
+  if(max===min){ h=0; s=0; }
+  else{
+    const d=max-min;
+    s = l>0.5 ? d/(2-max-min) : d/(max+min);
+    switch(max){
+      case r: h=(g-b)/d+(g<b?6:0); break;
+      case g: h=(b-r)/d+2; break;
+      default: h=(r-g)/d+4;
+    }
+    h/=6;
+  }
+  return [h,s,l];
+}
+function hslToRgbStr(h,s,l){
+  let r,g,b;
+  if(s===0){ r=g=b=l; }
+  else{
+    const hue2rgb=(p,q,t)=>{
+      if(t<0)t+=1; if(t>1)t-=1;
+      if(t<1/6) return p+(q-p)*6*t;
+      if(t<1/2) return q;
+      if(t<2/3) return p+(q-p)*(2/3-t)*6;
+      return p;
+    };
+    const q = l<0.5 ? l*(1+s) : l+s-l*s;
+    const p = 2*l-q;
+    r=hue2rgb(p,q,h+1/3);
+    g=hue2rgb(p,q,h);
+    b=hue2rgb(p,q,h-1/3);
+  }
+  return `rgb(${Math.round(r*255)},${Math.round(g*255)},${Math.round(b*255)})`;
+}
+function computeTheme(dataUrl){
+  return new Promise((resolve)=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const size = 24;
+      const canvas = document.createElement('canvas');
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, size, size);
+      let r=0,g=0,b=0,count=0;
+      try{
+        const data = ctx.getImageData(0,0,size,size).data;
+        for(let i=0;i<data.length;i+=4){
+          r+=data[i]; g+=data[i+1]; b+=data[i+2]; count++;
+        }
+      } catch(e){ resolve(null); return; }
+      if(count===0){ resolve(null); return; }
+      r=Math.round(r/count); g=Math.round(g/count); b=Math.round(b/count);
+      const [h,s] = rgbToHsl(r,g,b);
+      const sat = Math.max(s, 0.35);
+      resolve({
+        accent: hslToRgbStr(h, sat, 0.45),
+        accentDark: hslToRgbStr(h, sat, 0.28),
+        tint: hslToRgbStr(h, Math.min(sat,0.5), 0.93)
+      });
+    };
+    img.onerror = ()=>resolve(null);
+    img.src = dataUrl;
+  });
+}
+
 let cardPhotoTargetId = null;
 document.getElementById('cardPhotoInput').addEventListener('change', (e)=>{
   const file = e.target.files[0];
   if(!file || cardPhotoTargetId===null) return;
   const reader = new FileReader();
-  reader.onload = ()=>{
+  reader.onload = async ()=>{
     const prod = productions.find(p=>p.id===cardPhotoTargetId);
     prod.image = reader.result;
+    prod.theme = await computeTheme(reader.result);
     saveData();
     render();
   };
@@ -756,6 +852,7 @@ document.getElementById('sortSelect').addEventListener('change', (e)=>{
 
 let newInterest = 0;
 let newImageData = '';
+let newThemeData = null;
 
 function resetAddForm(){
   document.getElementById('newName').value = '';
@@ -772,6 +869,7 @@ function resetAddForm(){
   preview.src = '';
   preview.style.display = 'none';
   newImageData = '';
+  newThemeData = null;
   newInterest = 0;
   document.querySelectorAll('#newStars .star').forEach(s=>s.classList.remove('filled'));
 }
@@ -801,11 +899,12 @@ document.getElementById('newImageFile').addEventListener('change', (e)=>{
   const file = e.target.files[0];
   if(!file) return;
   const reader = new FileReader();
-  reader.onload = ()=>{
+  reader.onload = async ()=>{
     newImageData = reader.result;
     const preview = document.getElementById('newImagePreview');
     preview.src = newImageData;
     preview.style.display = 'block';
+    newThemeData = await computeTheme(newImageData);
   };
   reader.readAsDataURL(file);
 });
@@ -835,7 +934,8 @@ document.getElementById('saveAddBtn').addEventListener('click', ()=>{
     booked: booked && !!bookedDate,
     bookedDate: booked ? bookedDate : '',
     withWhom: document.getElementById('newWithWhom').value.trim(),
-    image: newImageData
+    image: newImageData,
+    theme: newThemeData
   });
   saveData();
   document.getElementById('addModal').classList.remove('show');
